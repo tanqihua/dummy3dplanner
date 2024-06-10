@@ -104,7 +104,7 @@ export const Horizontal = ({
   )
 }
 
-export default function({width = 20, height = 20, step = 1}){
+export default function({width = 100, height = 100, step = 1}){
   return (
       <group
         position={[-width/2, -1, height/2]}
