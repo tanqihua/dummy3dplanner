@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import React, { useRef } from 'react'
 import { OrbitControls , Text} from '@react-three/drei'
 import Griddd from './grids/grid-creator'
+import Walls from "./walls";
 
 
 export default function(){
@@ -14,6 +15,7 @@ export default function(){
             <Canvas>
                 <Griddd/>
                 <OrbitControls makeDefault/>
+                <Walls/>
             </Canvas>
         </div>
     )
