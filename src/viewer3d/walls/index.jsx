@@ -111,10 +111,15 @@ const Index = ()=>{
     let p1 = {x : 0, y : 0}
     let p2 = {x : 1, y : 2}
     let p3 = {x : 2, y : 2}
+
+    let _ = get(p1, p2, p3, 0.1);
    
 
     let {len, angle} = cordinateConverter(p1, p2);
     let {len : len2, angle : angle2} = cordinateConverter(p2, p3);
+    let t = 0.1;
+
+    
 
     return (
         <>
@@ -129,11 +134,15 @@ const Index = ()=>{
             <Test 
                 len={len2} 
                 height={1}
-                position={[p2.x, -1, p2.y]}
+                position={[p2.x   , -1, p2.y]}
                 rotation={[0, angle2, 0]}
-                ss1 = {-0.06}
-                ss = {0.05}
             />
+            {/* <Test 
+                len={_.len} 
+                height={1}
+                position={[_.pp.x, -1, _.pp.y]}
+                rotation={[0, _.angle, 0]}
+            /> */}
         </>
     )
 }
@@ -146,6 +155,26 @@ const cordinateConverter = (p1 , p2)=>{
         len,
         angle
     }
+}
+
+const get = (_p1 , _p2 , _p3 , thickness)=>{
+    let len1 = Math.sqrt(Math.pow(_p1.x - _p2.x, 2) + Math.pow(_p1.y - _p2.y, 2));
+    let len2 = Math.sqrt(Math.pow(_p2.x - _p3.x, 2) + Math.pow(_p2.y - _p3.y, 2));
+    let len3 = Math.sqrt(Math.pow(_p3.x - _p1.x, 2) + Math.pow(_p3.y - _p1.y, 2));
+    console.log(len1, len2, len3)
+    
+    let m1 = (_p2.y - _p1.y) / (_p2.x - _p1.x);
+    let m2 = (_p3.y - _p2.y) / (_p3.x - _p2.x);
+    let c1 = _p1.y - m1 * _p1.x;
+    let c2 = _p2.y - m2 * _p2.x;
+
+    // find the angle between the two lines
+    let _angle = Math.atan((m2 - m1) / (1 + m1 * m2));
+    // value only from 0 to 180 or 0 to -180
+    _angle = _angle < 0 ? _angle + Math.PI : _angle;
+
+    
+    return null;
 }
 
 
