@@ -83,14 +83,18 @@ const Index = ()=>{
     let p1 = {x : -8, y : 0}
     let p2 = {x : -7, y : -3}
     let p3 = {x : -3, y : 1}
-    let p4 = {x : -1, y : 0}
+    let p4 = {x : -1, y : -2}
+    let p5 = {x : -3, y : -3}
 
     // let _ = get(p1, p2, p3, 0.1);
+    let _1 = get(p1, p2, p3, 0.1);
     let _2 = get(p2, p3, p4, 0.1);
+    let _3 = get(p3, p4, p5, 0.1);
 
     let {len, angle} = cordinateConverter(p1, p2);
     let {len : len2, angle : angle2} = cordinateConverter(p2, p3);
     let {len : len3, angle : angle3} = cordinateConverter(p3, p4);
+    let {len : len4, angle : angle4} = cordinateConverter(p4, p5);
 
 
     return (
@@ -100,22 +104,37 @@ const Index = ()=>{
                 height={1}
                 position={[p1.x   , -1, p1.y]}
                 rotation={[0, angle, 0]}
-                ee = {-0.166}
-                ee1 = {0.166}
+                ee = {_1.l1 * -1}
+                ee1 = {_1.l2 * -1}
             />
             <Test 
                 len={len2} 
                 height={1}
                 position={[p2.x   , -1, p2.y]}
                 rotation={[0, angle2, 0]}
-                ss = {-0.166}
-                ss1 = {0.166}
+                ss1={_1.l1}
+                ss={_1.l2}
+                ee = {_2.l1} 
+                ee1 = {_2.l2}
             />
             <Test
                 len={len3} 
                 height={1}
                 position={[p3.x   , -1, p3.y]}
                 rotation={[0, angle3, 0]}
+                ss1={_2.l1 * -1}
+                ss={_2.l2 * -1}
+                ee = {_3.l1}
+                ee1 = {_3.l2}
+            />
+
+            <Test
+                len={len4} 
+                height={1}
+                position={[p4.x   , -1, p4.y]}
+                rotation={[0, angle4, 0]}
+                ss1={_3.l1 * -1}
+                ss={_3.l2 * -1}
             />
         </>
     )
@@ -142,14 +161,14 @@ const get = (_p1 , _p2 , _p3 , thickness)=>{
     let c2 = _p2.y - m2 * _p2.x;
     let m3 = (_p1.y - _p3.y) / (_p1.x - _p3.x);
     let c3 = _p3.y - m3 * _p3.x;
+
     
     let cosB = (a*a + c*c - b*b) / (2 * a * c);
-    let p = findHalfAnglePointB(_p1, _p2, _p3);
-    console.log(p);
+    let p = findHalfAnglePointB(_p1, _p2, _p3 , Math.acos(cosB));
     let midm3 = (p.y - _p2.y) / (p.x - _p2.x);
     let midc3 = _p2.y - midm3 * _p2.x;
 
-    let thicknessEquation = findParallelLineEquation(m1, c1, thickness * 2);
+    let thicknessEquation = findParallelLineEquation(m1, c1, thickness);
     let crossPoint1 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c1);
     let crossPoint2 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c2);
     // create a fomular from _p2 to parallel line 1
@@ -158,7 +177,20 @@ const get = (_p1 , _p2 , _p3 , thickness)=>{
     let crossPoint3 = findIntersection(mm1, cc1, thicknessEquation.m, thicknessEquation.c1);
     let crossPoint4 = findIntersection(mm1, cc1, thicknessEquation.m, thicknessEquation.c2);
 
-    return p;
+    let len = distanceBetweenTwoPoints(crossPoint1, crossPoint3);
+    let len2 = distanceBetweenTwoPoints(crossPoint2, crossPoint4);
+    
+    if(thicknessEquation.c1 >= thicknessEquation.c2){
+        len2 = -len2;
+    }
+    else{
+        len = -len;
+    }
+
+    return {
+        l1 : len,
+        l2 : len2
+    }
 }
 
 function findParallelLineEquation(m, c, d) {
@@ -173,38 +205,15 @@ function findParallelLineEquation(m, c, d) {
 }
 
 function findHalfAnglePointB(A, B, C) {
-    // Extract coordinates of points A, B, C
-    let xA = A.x, yA = A.y;
-    let xB = B.x, yB = B.y;
-    let xC = C.x, yC = C.y;
+    const AB = Math.sqrt((A.x - B.x) ** 2 + (A.y - B.y) ** 2);
+    const BC = Math.sqrt((C.x - B.x) ** 2 + (C.y - B.y) ** 2);
+
+    const D = {
+        x: (A.x * BC + C.x * AB) / (AB + BC),
+        y: (A.y * BC + C.y * AB) / (AB + BC)
+    };
     
-    // Calculate vectors AB and AC
-    let ABx = xB - xA;
-    let ABy = yB - yA;
-    let ACx = xC - xA;
-    let ACy = yC - yA;
-    
-    // Calculate dot product and lengths of vectors
-    let dot_product = ABx * ACx + ABy * ACy;
-    let length_AB = Math.sqrt(ABx * ABx + ABy * ABy);
-    let length_AC = Math.sqrt(ACx * ACx + ACy * ACy);
-    
-    // Calculate angle between vectors AB and AC
-    let cos_angleB = dot_product / (length_AB * length_AC);
-    let angleB = Math.acos(cos_angleB);
-    
-    // Calculate half of angleB
-    let half_angleB = angleB / 2;
-    
-    // Calculate direction and length of vector AD
-    let AD_length = length_AC * Math.tan(half_angleB);
-    let AD_direction = [ACx / length_AC, ACy / length_AC];
-    
-    // Calculate coordinates of point D
-    let xD = xA + AD_length * AD_direction[0];
-    let yD = yA + AD_length * AD_direction[1];
-    
-    return [xD, yD];
+    return D
 }
 
 const findIntersection = (m1, c1, m2, c2) => {
