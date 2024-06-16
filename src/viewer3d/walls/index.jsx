@@ -1,35 +1,7 @@
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useRef } from 'react';
-
-const Wall = ({
-    x = 2   ,
-    height = 1,
-    position = [0, 0, 0],
-    rotation = [0, 0, 0],
-}, ...rest)=>{
-    const wallShape = new THREE.Shape();
-    wallShape.moveTo(0, 0);
-    wallShape.lineTo(x, 0);
-    wallShape.lineTo(x, height);
-    wallShape.lineTo(0, height);
-    wallShape.lineTo(0, 0);
-
-    const wallGeometry = new THREE.ExtrudeGeometry(wallShape, {
-        depth: 0.1,
-        bevelEnabled: false
-    });
-    
-
-    return (
-        <mesh geometry={wallGeometry} material={new THREE.MeshStandardMaterial({ color: 0xff9999 , wireframe : true})}
-            position={position}
-            rotation={rotation}
-            {...rest}
-        >
-        </mesh>
-    )
-}
+import { compressNormals } from 'three/examples/jsm/utils/GeometryCompressionUtils.js';
 
 const Test = ({
     len = 4,
@@ -108,18 +80,18 @@ const Test = ({
 }
 
 const Index = ()=>{
-    let p1 = {x : 0, y : 0}
-    let p2 = {x : 1, y : 2}
-    let p3 = {x : 2, y : 2}
+    let p1 = {x : -8, y : 0}
+    let p2 = {x : -7, y : -3}
+    let p3 = {x : -3, y : 1}
+    let p4 = {x : -1, y : 0}
 
-    let _ = get(p1, p2, p3, 0.1);
-   
+    // let _ = get(p1, p2, p3, 0.1);
+    let _2 = get(p2, p3, p4, 0.1);
 
     let {len, angle} = cordinateConverter(p1, p2);
     let {len : len2, angle : angle2} = cordinateConverter(p2, p3);
-    let t = 0.1;
+    let {len : len3, angle : angle3} = cordinateConverter(p3, p4);
 
-    
 
     return (
         <>
@@ -128,21 +100,23 @@ const Index = ()=>{
                 height={1}
                 position={[p1.x   , -1, p1.y]}
                 rotation={[0, angle, 0]}
-                ee1 = {-0.06}
-                ee = {0.05}
+                ee = {-0.166}
+                ee1 = {0.166}
             />
             <Test 
                 len={len2} 
                 height={1}
                 position={[p2.x   , -1, p2.y]}
                 rotation={[0, angle2, 0]}
+                ss = {-0.166}
+                ss1 = {0.166}
             />
-            {/* <Test 
-                len={_.len} 
+            <Test
+                len={len3} 
                 height={1}
-                position={[_.pp.x, -1, _.pp.y]}
-                rotation={[0, _.angle, 0]}
-            /> */}
+                position={[p3.x   , -1, p3.y]}
+                rotation={[0, angle3, 0]}
+            />
         </>
     )
 }
@@ -158,24 +132,90 @@ const cordinateConverter = (p1 , p2)=>{
 }
 
 const get = (_p1 , _p2 , _p3 , thickness)=>{
-    let len1 = Math.sqrt(Math.pow(_p1.x - _p2.x, 2) + Math.pow(_p1.y - _p2.y, 2));
-    let len2 = Math.sqrt(Math.pow(_p2.x - _p3.x, 2) + Math.pow(_p2.y - _p3.y, 2));
-    let len3 = Math.sqrt(Math.pow(_p3.x - _p1.x, 2) + Math.pow(_p3.y - _p1.y, 2));
-    console.log(len1, len2, len3)
+    let c = distanceBetweenTwoPoints(_p1, _p2);
+    let a = distanceBetweenTwoPoints(_p2, _p3);
+    let b = distanceBetweenTwoPoints(_p3, _p1);
     
     let m1 = (_p2.y - _p1.y) / (_p2.x - _p1.x);
-    let m2 = (_p3.y - _p2.y) / (_p3.x - _p2.x);
     let c1 = _p1.y - m1 * _p1.x;
+    let m2 = (_p3.y - _p2.y) / (_p3.x - _p2.x);
     let c2 = _p2.y - m2 * _p2.x;
-
-    // find the angle between the two lines
-    let _angle = Math.atan((m2 - m1) / (1 + m1 * m2));
-    // value only from 0 to 180 or 0 to -180
-    _angle = _angle < 0 ? _angle + Math.PI : _angle;
-
+    let m3 = (_p1.y - _p3.y) / (_p1.x - _p3.x);
+    let c3 = _p3.y - m3 * _p3.x;
     
-    return null;
+    let cosB = (a*a + c*c - b*b) / (2 * a * c);
+    let p = findHalfAnglePointB(_p1, _p2, _p3);
+    console.log(p);
+    let midm3 = (p.y - _p2.y) / (p.x - _p2.x);
+    let midc3 = _p2.y - midm3 * _p2.x;
+
+    let thicknessEquation = findParallelLineEquation(m1, c1, thickness * 2);
+    let crossPoint1 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c1);
+    let crossPoint2 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c2);
+    // create a fomular from _p2 to parallel line 1
+    let mm1 = -1 / m1;
+    let cc1 = _p2.y - mm1 * _p2.x;
+    let crossPoint3 = findIntersection(mm1, cc1, thicknessEquation.m, thicknessEquation.c1);
+    let crossPoint4 = findIntersection(mm1, cc1, thicknessEquation.m, thicknessEquation.c2);
+
+    return p;
 }
 
+function findParallelLineEquation(m, c, d) {
+    let denominator = Math.sqrt(m * m + 1);    
+    let c1 = c + d * denominator;
+    let c2 = c - d * denominator;        
+    return {
+        m : m,
+        c1 : c1,
+        c2 : c2
+    };
+}
+
+function findHalfAnglePointB(A, B, C) {
+    // Extract coordinates of points A, B, C
+    let xA = A.x, yA = A.y;
+    let xB = B.x, yB = B.y;
+    let xC = C.x, yC = C.y;
+    
+    // Calculate vectors AB and AC
+    let ABx = xB - xA;
+    let ABy = yB - yA;
+    let ACx = xC - xA;
+    let ACy = yC - yA;
+    
+    // Calculate dot product and lengths of vectors
+    let dot_product = ABx * ACx + ABy * ACy;
+    let length_AB = Math.sqrt(ABx * ABx + ABy * ABy);
+    let length_AC = Math.sqrt(ACx * ACx + ACy * ACy);
+    
+    // Calculate angle between vectors AB and AC
+    let cos_angleB = dot_product / (length_AB * length_AC);
+    let angleB = Math.acos(cos_angleB);
+    
+    // Calculate half of angleB
+    let half_angleB = angleB / 2;
+    
+    // Calculate direction and length of vector AD
+    let AD_length = length_AC * Math.tan(half_angleB);
+    let AD_direction = [ACx / length_AC, ACy / length_AC];
+    
+    // Calculate coordinates of point D
+    let xD = xA + AD_length * AD_direction[0];
+    let yD = yA + AD_length * AD_direction[1];
+    
+    return [xD, yD];
+}
+
+const findIntersection = (m1, c1, m2, c2) => {
+    let x = (c2 - c1) / (m1 - m2);
+    let y = m1 * x + c1;
+
+    return { x: x, y: y };
+}
+
+const distanceBetweenTwoPoints = (p1, p2) => {
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
 
 export default Index;
