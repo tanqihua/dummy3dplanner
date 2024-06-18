@@ -84,7 +84,7 @@ const Index = ()=>{
     let p2 = {x : -7, y : -3}
     let p3 = {x : -3, y : 1}
     let p4 = {x : -1, y : -2}
-    let p5 = {x : -3, y : -3}
+    let p5 = {x :2, y : -5}
 
     // let _ = get(p1, p2, p3, 0.1);
     let _1 = get(p1, p2, p3, 0.1);
@@ -124,8 +124,8 @@ const Index = ()=>{
                 rotation={[0, angle3, 0]}
                 ss1={_2.l1 * -1}
                 ss={_2.l2 * -1}
-                ee = {_3.l1}
-                ee1 = {_3.l2}
+                ee = {_3.l1 * -1}
+                ee1 = {_3.l2 * -1}
             />
 
             <Test
@@ -133,8 +133,8 @@ const Index = ()=>{
                 height={1}
                 position={[p4.x   , -1, p4.y]}
                 rotation={[0, angle4, 0]}
-                ss1={_3.l1 * -1}
-                ss={_3.l2 * -1}
+                ss1={_3.l1}
+                ss={_3.l2}  
             />
         </>
     )
