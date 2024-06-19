@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { useRef } from 'react';
 import { compressNormals } from 'three/examples/jsm/utils/GeometryCompressionUtils.js';
 
+const thickness = 0.1;
+
 const Test = ({
     len = 4,
     height = 1,
@@ -15,7 +17,6 @@ const Test = ({
 })=>{
     const geometry = new THREE.BufferGeometry();
   
-    const thickness = 0.1;
     const vertices = new Float32Array([
         -height/2, -thickness,  0 - ss, // v0
         height/2, -thickness,  0 - ss, // v1
@@ -55,7 +56,7 @@ const Test = ({
     
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));        
-    const material = new THREE.MeshBasicMaterial( { color: 0xff0000 , wireframe : true} );
+    const material = new THREE.MeshBasicMaterial( { color: 0x000000 , wireframe : true} );
 
     let _pos = [
         position[0],
@@ -80,21 +81,25 @@ const Test = ({
 }
 
 const Index = ()=>{
-    let p1 = {x : -8, y : 0}
-    let p2 = {x : -7, y : -3}
+    let p1 = {x : 0, y : 1}
+    let p2 = {x : -2, y : 0}
     let p3 = {x : -3, y : 1}
-    let p4 = {x : -1, y : -2}
-    let p5 = {x :2, y : -5}
+    let p4 = {x : -1, y : 2}
+    let p5 = {x :3, y : 6}
+    let p6 = {x :2, y : -2}
+
 
     // let _ = get(p1, p2, p3, 0.1);
-    let _1 = get(p1, p2, p3, 0.1);
-    let _2 = get(p2, p3, p4, 0.1);
-    let _3 = get(p3, p4, p5, 0.1);
+    let _1 = get(p1, p2, p3, thickness);
+    let _2 = get(p2, p3, p4, thickness);
+    let _3 = get(p3, p4, p5, thickness);
+    let _4 = get(p4, p5, p6, thickness);
 
     let {len, angle} = cordinateConverter(p1, p2);
     let {len : len2, angle : angle2} = cordinateConverter(p2, p3);
     let {len : len3, angle : angle3} = cordinateConverter(p3, p4);
     let {len : len4, angle : angle4} = cordinateConverter(p4, p5);
+    let {len : len5, angle : angle5} = cordinateConverter(p5, p6);
 
 
     return (
@@ -104,16 +109,16 @@ const Index = ()=>{
                 height={1}
                 position={[p1.x   , -1, p1.y]}
                 rotation={[0, angle, 0]}
-                ee = {_1.l1 * -1}
-                ee1 = {_1.l2 * -1}
+                ee = {_1.l1}
+                ee1 = {_1.l2}
             />
             <Test 
                 len={len2} 
                 height={1}
                 position={[p2.x   , -1, p2.y]}
                 rotation={[0, angle2, 0]}
-                ss1={_1.l1}
-                ss={_1.l2}
+                ss1={_1.l1 * -1}
+                ss={_1.l2 * -1}
                 ee = {_2.l1} 
                 ee1 = {_2.l2}
             />
@@ -124,17 +129,26 @@ const Index = ()=>{
                 rotation={[0, angle3, 0]}
                 ss1={_2.l1 * -1}
                 ss={_2.l2 * -1}
-                ee = {_3.l1 * -1}
-                ee1 = {_3.l2 * -1}
+                ee = {_3.l1}
+                ee1 = {_3.l2}
             />
-
             <Test
                 len={len4} 
                 height={1}
                 position={[p4.x   , -1, p4.y]}
                 rotation={[0, angle4, 0]}
-                ss1={_3.l1}
-                ss={_3.l2}  
+                ss1={_3.l1 * -1}
+                ss={_3.l2 * -1}
+                ee = {_4.l1}
+                ee1 = {_4.l2}
+            />
+            <Test
+                len={len5} 
+                height={1}
+                position={[p5.x   , -1, p5.y]}
+                rotation={[0, angle5, 0]}
+                ss1={_4.l1 * -1}
+                ss={_4.l2 * -1}
             />
         </>
     )
@@ -167,7 +181,7 @@ const get = (_p1 , _p2 , _p3 , thickness)=>{
     let p = findHalfAnglePointB(_p1, _p2, _p3 , Math.acos(cosB));
     let midm3 = (p.y - _p2.y) / (p.x - _p2.x);
     let midc3 = _p2.y - midm3 * _p2.x;
-
+    // thickness line
     let thicknessEquation = findParallelLineEquation(m1, c1, thickness);
     let crossPoint1 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c1);
     let crossPoint2 = findIntersection(midm3, midc3, thicknessEquation.m, thicknessEquation.c2);
@@ -180,16 +194,23 @@ const get = (_p1 , _p2 , _p3 , thickness)=>{
     let len = distanceBetweenTwoPoints(crossPoint1, crossPoint3);
     let len2 = distanceBetweenTwoPoints(crossPoint2, crossPoint4);
     
-    if(thicknessEquation.c1 >= thicknessEquation.c2){
-        len2 = -len2;
+    // direction
+    let c1Length = distanceBetweenTwoPoints(_p1, crossPoint1);
+    let c2Length = distanceBetweenTwoPoints(_p1, crossPoint3);
+
+
+    let check = _p1.x - _p2.x < 0 ? true : false;
+    
+    if(c1Length < c2Length && check){
+        len = -len;
     }
     else{
-        len = -len;
+        len2 = -len2;
     }
 
     return {
-        l1 : len,
-        l2 : len2
+        l1 : len || 0,
+        l2 : len2 || 0
     }
 }
 
