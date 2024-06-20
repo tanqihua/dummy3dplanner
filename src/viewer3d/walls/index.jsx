@@ -3,11 +3,11 @@ import * as THREE from 'three';
 import { useRef } from 'react';
 import { compressNormals } from 'three/examples/jsm/utils/GeometryCompressionUtils.js';
 
-const thickness = 0.1;
+const thickness = 0.2;
 
 const Test = ({
     len = 4,
-    height = 1,
+    height = 2,
     position = [0, 0, 0],
     rotation = [0, 0, 0],
     ee = 0,
@@ -86,7 +86,7 @@ const Index = ()=>{
     let p3 = {x : -3, y : 1}
     let p4 = {x : -1, y : 2}
     let p5 = {x :3, y : 6}
-    let p6 = {x :2, y : -2}
+    let p6 = {x :-3, y : 8}
 
 
     // let _ = get(p1, p2, p3, 0.1);
@@ -106,7 +106,6 @@ const Index = ()=>{
         <>
             <Test 
                 len={len} 
-                height={1}
                 position={[p1.x   , -1, p1.y]}
                 rotation={[0, angle, 0]}
                 ee = {_1.l1}
@@ -114,7 +113,6 @@ const Index = ()=>{
             />
             <Test 
                 len={len2} 
-                height={1}
                 position={[p2.x   , -1, p2.y]}
                 rotation={[0, angle2, 0]}
                 ss1={_1.l1 * -1}
@@ -124,7 +122,6 @@ const Index = ()=>{
             />
             <Test
                 len={len3} 
-                height={1}
                 position={[p3.x   , -1, p3.y]}
                 rotation={[0, angle3, 0]}
                 ss1={_2.l1 * -1}
@@ -134,7 +131,6 @@ const Index = ()=>{
             />
             <Test
                 len={len4} 
-                height={1}
                 position={[p4.x   , -1, p4.y]}
                 rotation={[0, angle4, 0]}
                 ss1={_3.l1 * -1}
@@ -144,7 +140,6 @@ const Index = ()=>{
             />
             <Test
                 len={len5} 
-                height={1}
                 position={[p5.x   , -1, p5.y]}
                 rotation={[0, angle5, 0]}
                 ss1={_4.l1 * -1}
