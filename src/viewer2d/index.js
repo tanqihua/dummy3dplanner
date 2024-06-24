@@ -1,53 +1,45 @@
-import React, { useEffect } from 'react'
-
-import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react'
-import { fabric } from 'fabric'; // Added import for fabric
+import React, { useEffect, useState } from 'react'
+import {UncontrolledReactSVGPanZoom} from 'react-svg-pan-zoom';
+import { useRef } from 'react';
 
 const Index = () => {
-  const { editor, onReady } = useFabricJSEditor();
+  const Viewer = useRef(null);
 
+  useEffect(() => {
+    Viewer.current.fitToViewer();
+  }, []);
 
-  const AddLine = (x , y , canvas) => {
-    window.line = new fabric.Line([x, y, x, y], {
-        stroke: 'red',
-        strokeWidth: 15,
-    });
-    canvas.add(window.line);
-    canvas.renderAll();
-  }
+  /* Read all the available methods in the documentation */
+  const _zoomOnViewerCenter = () => Viewer.current.zoomOnViewerCenter(1.1)
+  const _fitSelection = () => Viewer.current.fitSelection(40, 40, 200, 200)
+  const _fitToViewer = () => Viewer.current.fitToViewer()
+
+  let width = window.innerWidth;
+  let height = window.innerHeight;
+  const [end , setEnd] = useState({x : 500 , y : 500});
+  const getPathD = (start, end) => `M ${start.x + width /2},${start.y + height / 2} L ${end.x},${end.y}`;
+
 
   return (
     <div>
-        <button onClick={()=>AddLine(100, 100)}>Add Line</button>
-        <FabricJSCanvas className="sample-canvas" 
-            onReady={(canvas)=>{
-                canvas.selection = false
-                canvas.setWidth(window.innerWidth)
-                canvas.setHeight(window.innerHeight)
-                onReady(canvas)
+      <UncontrolledReactSVGPanZoom
+        ref={Viewer}
+        width={window.innerWidth} height={window.innerHeight}
+        zoom={1}
+        onZoom={e => console.log('zoom')}
+        onPan={e => console.log('pan')}
 
-                canvas.on('mouse:down', function(options) {
-                const pointer = canvas.getPointer(options.e);
-                window.mouseDown = true
-
-                AddLine(pointer.x, pointer.y, canvas)
-                })
-                canvas.on('mouse:up', function(options) {
-                const pointer = canvas.getPointer(options.e);
-                window.mouseDown = false
-            })
-
-            canvas.on('mouse:move', function(options) {
-            const pointer = canvas.getPointer(options.e);
-
-            if(window.mouseDown){
-                
-                window.line.set({ x2: pointer.x, y2: pointer.y });
-                canvas.renderAll();
-            }
-            })
-      }}
-      />    
+        onMouseMove={event => {
+          setEnd({
+            x : event.x,
+            y : event.y
+          })
+        }}
+      >
+        <svg width={width} height={height}>
+          <path d={getPathD({x : 0 , y : 0}, {x : end.x , y : end.y})} fill="none" stroke="black" />
+        </svg>
+      </UncontrolledReactSVGPanZoom>
     </div>
   )
 }
