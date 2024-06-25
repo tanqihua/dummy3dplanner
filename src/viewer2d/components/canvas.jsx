@@ -50,13 +50,15 @@ function DraggableDiv({
         y: mousePointTo.y * (newScale / scale),
     };
 
+
+
     setPosition({
         x: hoverPos.x - newScalePoint.x,
         y: hoverPos.y - newScalePoint.y,
     });
 
-    setScale(newScale);
 
+    setScale(newScale);
   };
 
 
@@ -75,12 +77,15 @@ function DraggableDiv({
         onMouseUp={onMouseUp}
         onWheel={handleWheel}
         onClick={(e)=>{
-            console.log(e.clientX , e.clientY);
+          let ratioX = e.clientX / window.innerWidth;
+          let ratioY = e.clientY / window.innerHeight;
+          
+          
         }}
         
         style={{
-          width: "8000px",
-          height: "8000px",
+          width: "4000px",
+          height: "4000px",
           position: 'absolute',
           transformStyle: 'preserve-3d',
           transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
@@ -90,16 +95,30 @@ function DraggableDiv({
         }}
       >
         <svg width="100%" height="100%"
-          viewBox='0 0 8000 8000'
+          viewBox='0 0 4000 4000'
         >
           <g
             etype="TPaper"
             transform="translate(-0.5, -0.5)scale(1)"
           >
             <pattern id="uid10" patternUnits="userSpaceOnUse" x="0.5" y="0.5" spreadMethod="pad" width="100" height="100">
-              <image x="0" y="0" width="100" height="100" style={{ imageRendering: "pixelated" }} href="https://static.planner5d.com/textures/bg_1_fill_clear.png"/>
+              <image x="0" y="0" width="100" height="100" style={{ imageRendering: "auto" }} href="https://static.planner5d.com/textures/bg_1_fill_clear.png"/>
             </pattern>
-            <rect fill="url(#uid10)" id="uid5" etype="rect" x="0" y="0" width="8000" height="8000"
+            <rect fill="url(#uid10)" id="uid5" etype="rect" x="0" y="0" width="4000" height="4000"
+              onClick={(e)=>{
+                const svgElement = document.getElementById('uid5');
+                const rect = svgElement.getBoundingClientRect();
+        
+                // Adjusting click coordinates
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+        
+                window.setCirclePosition({
+                  x: clickX / scale,
+                  y: clickY / scale,
+                })
+        
+              }}
             ></rect>
 
             {
