@@ -6,25 +6,29 @@ const Index = () => {
     return (
         <CanvasSvg>
           <Circle/>
-          <LinePath/>
+          {/* <LinePath/> */}
         </CanvasSvg>
     )
 }
 
 const Circle = ({position})=>{
-    // const [circlePosition , setCirclePosition] = useState({x : 2000 , y : 2000});
+    const [circlePosition , setCirclePosition] = useState({x : 2000 , y : 2000});
 
-    // useEffect(()=>{
-    //   window.setCirclePosition = (position)=>{
-    //     setCirclePosition(position);
-    //   };
-    // },[position])
-    // return (
-    //   <g>
-    //     {/* <circle cx={circlePosition.x} cy={circlePosition.y} r="180" stroke="black" strokeWidth="3" fill="red" /> */}
-        
-    //   </g>
-    // )
+    useEffect(()=>{
+      window.setCirclePosition = (position)=>{
+        setCirclePosition(position);
+      };
+    },[position])
+    return (
+      <g>
+        <circle 
+          onClick={(e)=>{
+            e.stopPropagation();
+            console.log("clicked");
+          }}
+        cx={circlePosition.x} cy={circlePosition.y} r="180" stroke="black" strokeWidth="3" fill="red" />
+      </g>
+    )
 }
 
 
