@@ -1,13 +1,18 @@
 import React, { useMemo, useState } from 'react';
+import {useStore} from "../../store"
+
 
 function DraggableDiv({
     children,
+    isDrawWall
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [hoverPos , setHoverPos] = useState({x : 0 , y : 0});
+  const store = useStore();
+
   const onMouseDown = (e) => {
     setIsDragging(true);
     setStartPos({
@@ -17,12 +22,15 @@ function DraggableDiv({
   };
 
   const onMouseMove = (e) => {
-    if (isDragging) {
+    if(isDrawWall && window.startPos){
+      HanderMouseWallMove([e.clientX , e.clientY] , scale);
+    }
+
+    if (isDragging && !isDrawWall) {
       setPosition({
         x: e.clientX - startPos.x,
         y: e.clientY - startPos.y,
       });
-      localStorage.setItem("pivotPosition" , JSON.stringify(position));
     }else{
       setHoverPos({
         x : e.clientX,
@@ -71,18 +79,12 @@ function DraggableDiv({
         position: "relative",
       }}
     >
+  
       <div
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onWheel={handleWheel}
-        onClick={(e)=>{
-          let ratioX = e.clientX / window.innerWidth;
-          let ratioY = e.clientY / window.innerHeight;
-          
-          
-        }}
-        
         style={{
           width: "4000px",
           height: "4000px",
@@ -110,14 +112,11 @@ function DraggableDiv({
                 const rect = svgElement.getBoundingClientRect();
         
                 // Adjusting click coordinates
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
-        
-                window.setCirclePosition({
-                  x: clickX / scale,
-                  y: clickY / scale,
-                })
-        
+                let clickPos = [(e.clientX - rect.left) / scale, (e.clientY - rect.top) / scale]; 
+                
+                if(isDrawWall){
+                    DrawWallHander(store , clickPos);
+                }
               }}
             ></rect>
 
@@ -130,5 +129,42 @@ function DraggableDiv({
     </section>
   );
 }
+
+const DrawWallHander = (store , pos)=>{
+  const {addTempWall} = store;
+  if(!window.startPos){
+    window.startPos = pos;
+    return;
+  }
+  else if(!window.endPos){
+    window.endPos = pos;
+    addTempWall({
+      start : window.startPos,
+      end : window.endPos
+    });
+    window.startPos = window.endPos;
+    window.endPos = null;
+    document.getElementById('showline').setAttribute('x1' , window.startPos[0]);
+    document.getElementById('showline').setAttribute('y1' , window.startPos[1]);
+  }
+}
+
+const HanderMouseWallMove = (pos , scale)=>{
+  const svgElement = document.getElementById('uid5');
+  const rect = svgElement.getBoundingClientRect();
+
+  // Adjusting click coordinates
+  let movingPos = [(pos[0] - rect.left) / scale, (pos[1] - rect.top) / scale]; 
+
+  if(window.startPos){
+    let line = document.getElementById('showline');
+    line.setAttribute('x2' , movingPos[0]);
+    line.setAttribute('y2' , movingPos[1]);
+    line.setAttribute('x1' , window.startPos[0]);
+    line.setAttribute('y1' , window.startPos[1]);
+  }
+}
+
+
 
 export default DraggableDiv;
