@@ -33,7 +33,6 @@ const Circle = ({position})=>{
 
 
 const LinePath = ()=>{
-  // M 28 31 L 259 29 L 247 39 L 28 40 z
   const [circlePosition , setCirclePosition] = useState({x : 2500 , y : 2500});
 
   useEffect(()=>{
@@ -67,7 +66,7 @@ const LinePath = ()=>{
       M ${crossPoint1.x} ${crossPoint1.y}
       L ${crossPoint3.x} ${crossPoint3.y}
       L ${crossPoint4.x} ${crossPoint4.y}
-      L ${crossPoint2.x} ${crossPoint2.y}
+      L ${crossPoint2.x } ${crossPoint2.y}
       Z
     `
     
