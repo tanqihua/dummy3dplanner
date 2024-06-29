@@ -10,7 +10,8 @@ export default function(){
   
     return (
         <div
-            style={{width : "100svw", height : "100svh"}}
+            style={{width : "100svw", height : "100svh" , position : "absolute" , top : "0" , left : "0"}}
+            id='3dviewContainer'
         >
             <Canvas>
                 <Griddd/>

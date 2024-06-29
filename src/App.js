@@ -6,6 +6,7 @@ function App() {
   return (
     <div className="App">
       <View2d/>
+      <View3d/>
     </div>
   );
 }

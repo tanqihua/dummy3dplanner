@@ -8,9 +8,11 @@ import Wall2d from "./components/wall";
 
 const Index = () => {
     const {
-      isDrawWall
+      isDrawWall,
+      switchveiew
     } = useControls({
-      isDrawWall: true
+      isDrawWall: true,
+      switchveiew : true
     });
     
 
@@ -22,8 +24,22 @@ const Index = () => {
         window.startPos = null;
         window.endPos = null;
       }
-    }, [isDrawWall]);
-    // 
+
+      let view3d = document.getElementById("3dviewContainer");
+      let view2d = document.getElementById("2dviewContainer");
+      if(switchveiew && view2d && view3d){
+        view2d.style.zIndex = 1;
+        view3d.style.zIndex = 0;
+        view2d.style.opacity = 1;
+        view3d.style.opacity = 0;
+      }
+      else if(view2d && view3d){
+        view2d.style.zIndex = 0;
+        view3d.style.zIndex = 1;
+        view2d.style.opacity = 0;
+        view3d.style.opacity = 1;
+      }
+    }, [isDrawWall , switchveiew]);
 
     return (
         <CanvasSvg

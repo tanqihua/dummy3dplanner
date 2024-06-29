@@ -78,6 +78,7 @@ function DraggableDiv({
         overflow: "hidden",
         position: "relative",
       }}
+      id='2dviewContainer'
     >
   
       <div
@@ -95,6 +96,8 @@ function DraggableDiv({
           cursor: isDragging ? 'grabbing' : 'grab',
           willChange: 'auto',
         }}
+
+
       >
         <svg width="100%" height="100%"
           viewBox='0 0 4000 4000'
